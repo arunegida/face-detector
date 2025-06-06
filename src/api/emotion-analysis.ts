@@ -12,6 +12,14 @@ export interface EmotionAnalysisResult {
   description: string;
 }
 
+// Helper to extract JSON from Markdown code block
+function extractJsonFromMarkdown(markdown: string): string {
+  return markdown
+    .replace(/^```(?:json)?/i, '')
+    .replace(/```$/, '')
+    .trim();
+}
+
 export async function analyzeEmotionApi(base64Image: string): Promise<EmotionAnalysisResult> {
   try {
     const response = await openai.chat.completions.create({
@@ -52,7 +60,11 @@ export async function analyzeEmotionApi(base64Image: string): Promise<EmotionAna
     }
 
     // Parse the JSON response
-    const result = JSON.parse(content);
+    let jsonString = content;
+    if (jsonString.trim().startsWith('```')) {
+      jsonString = extractJsonFromMarkdown(jsonString);
+    }
+    const result = JSON.parse(jsonString);
     
     // Validate the response structure
     if (!result.emotion || typeof result.confidence !== 'number') {

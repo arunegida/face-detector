@@ -4,8 +4,10 @@ import { EmotionCard } from './components/EmotionCard';
 import { SongCard } from './components/SongCard';
 import { CameraCapture } from './components/CameraCapture';
 import { EmotionResult } from './components/EmotionResult';
+import YoutubePlayer from './components/YoutubePlayer';
 import { emotions } from './data/emotions';
 import { songs } from './data/songs';
+import { moodToYoutube } from './utils/moodToYoutube';
 
 type AppMode = 'camera' | 'manual' | 'results';
 
@@ -159,7 +161,10 @@ function App() {
                 </button>
               </div>
             </div>
-            
+            {/* YouTube Player for mood-based playlist */}
+            {/* <div className="mb-8">
+              <YoutubePlayer url={moodToYoutube(currentEmotion)} />
+            </div> */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
               {recommendedSongs.map((song) => (
                 <SongCard key={song.id} song={song} />

@@ -74,14 +74,14 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onEmotionDetected,
   const analyzeEmotion = async (imageDataUrl: string): Promise<EmotionAnalysisResult> => {
     try {
       const base64Image = imageDataUrl.split(',')[1];
-      
       const response = await analyzeEmotionApi(base64Image);
-
       console.log(response,'this is the response');
       onEmotionDetected(response.emotion, response.confidence);
+      return response;
     } catch (err) {
       setError('Failed to analyze emotion. Please try again.');
       console.error('Emotion analysis error:', err);
+      return { emotion: '', confidence: 0, description: 'No emotion detected' };
     }
   };
 
@@ -90,6 +90,23 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onEmotionDetected,
     setError('');
     startCamera();
   };
+
+  const handleImageUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      setError("");
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const imageDataUrl = e.target?.result as string;
+        setCapturedImage(imageDataUrl);
+        await analyzeEmotion(imageDataUrl);
+      };
+      reader.onerror = () => {
+        setError("Failed to read the image file. Please try another image.");
+      };
+      reader.readAsDataURL(file);
+    }, [analyzeEmotion]);
 
   return (
     <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 max-w-md mx-auto">
@@ -155,13 +172,26 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onEmotionDetected,
 
       <div className="space-y-3">
         {!isStreaming && !capturedImage && (
-          <button
-            onClick={startCamera}
-            className="w-full bg-white text-purple-600 font-semibold py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2"
-          >
-            <Camera className="w-4 h-4" />
-            <span>Start Camera</span>
-          </button>
+          <>
+            <button
+              onClick={startCamera}
+              className="w-full bg-white text-purple-600 font-semibold py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2"
+            >
+              <Camera className="w-4 h-4" />
+              <span>Start Camera</span>
+            </button>
+            <div className="w-full flex justify-center mt-2">
+              <label className="w-full bg-white text-purple-600 font-semibold py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2 cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <span>Upload Image</span>
+              </label>
+            </div>
+          </>
         )}
 
         {isStreaming && !capturedImage && (
