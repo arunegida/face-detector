@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 
 // This would typically be in your environment variables
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true // Only for demo - use server-side in production
 });
 
@@ -12,10 +12,10 @@ export interface EmotionAnalysisResult {
   description: string;
 }
 
-export async function analyzeEmotion(base64Image: string): Promise<EmotionAnalysisResult> {
+export async function analyzeEmotionApi(base64Image: string): Promise<EmotionAnalysisResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",

@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { Camera, RotateCcw, Loader2, AlertCircle } from 'lucide-react';
+import { analyzeEmotionApi, EmotionAnalysisResult   } from '../api/emotion-analysis';
 
 interface CameraCaptureProps {
   onEmotionDetected: (emotion: string, confidence: number) => void;
@@ -70,24 +71,14 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onEmotionDetected,
     await analyzeEmotion(imageDataUrl);
   }, [stopCamera]);
 
-  const analyzeEmotion = async (imageDataUrl: string) => {
+  const analyzeEmotion = async (imageDataUrl: string): Promise<EmotionAnalysisResult> => {
     try {
       const base64Image = imageDataUrl.split(',')[1];
       
-      const response = await fetch('/api/analyze-emotion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ image: base64Image }),
-      });
+      const response = await analyzeEmotionApi(base64Image);
 
-      if (!response.ok) {
-        throw new Error('Failed to analyze emotion');
-      }
-
-      const result = await response.json();
-      onEmotionDetected(result.emotion, result.confidence);
+      console.log(response,'this is the response');
+      onEmotionDetected(response.emotion, response.confidence);
     } catch (err) {
       setError('Failed to analyze emotion. Please try again.');
       console.error('Emotion analysis error:', err);
